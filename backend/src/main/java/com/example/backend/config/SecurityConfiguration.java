@@ -2,8 +2,10 @@ package com.example.backend.config;
 
 import com.auth0.jwt.JWT;
 import com.example.backend.entity.RestBean;
+import com.example.backend.entity.dto.Account;
 import com.example.backend.entity.vo.response.AuthorizeVO;
 import com.example.backend.filter.JwtAuthorizeFilter;
+import com.example.backend.service.AccountService;
 import com.example.backend.utils.JwtUtil;
 import jakarta.annotation.Resource;
 import jakarta.servlet.ServletException;
@@ -31,6 +33,8 @@ public class SecurityConfiguration {
     JwtUtil util;
     @Resource
     JwtAuthorizeFilter filter;
+    @Resource
+    AccountService service;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -68,13 +72,15 @@ public class SecurityConfiguration {
         response.setCharacterEncoding("utf-8");
 
         User user = (User)authentication.getPrincipal();
+        Account account = service.findAccountByNameOrEmail(user.getUsername());
 
-        String token = util.createJwt(user, 1, "小明");
-        AuthorizeVO vo = new AuthorizeVO();
-        vo.setExpire(JWT.decode(token).getExpiresAt());
-        vo.setRole("");
-        vo.setToken(token);
-        vo.setUsername("小明");
+        String token = util.createJwt(user, account.getId(), account.getUsername());
+        AuthorizeVO vo = account.asViewObject(AuthorizeVO.class,v -> {
+            v.setExpire(JWT.decode(token).getExpiresAt());
+            v.setToken(token);
+        });
+//        vo.setRole(account.getRole());
+//        vo.setUsername(account.getUsername());
 
         response.getWriter().write(RestBean.success(vo).asJsonString());
     }
