@@ -13,6 +13,10 @@ const defaultError = (error)=>{
     ElMessage.warning('发生错误，请联系管理员')
 }
 
+/**
+ * 取token
+ * @returns {*|null}
+ */
 function takeAccessToken(){
     const str = localStorage.getItem(authItemName)|| sessionStorage.getItem(authItemName)
     if(!str) return null
@@ -46,6 +50,11 @@ function storeAccessToken(token,remember,expire){
     }
 }
 
+function accessHeader(){
+    const token = takeAccessToken();
+    return token ? {"Authorization": `Bearer ${takeAccessToken()}`}:{}
+}
+
 function internalPost(url,data,header,success,failure,error=defaultError){
     axios.post(url,data,{headers:header}).then(({data})=>{
         if(data.code == 200){
@@ -66,6 +75,14 @@ function internalGet(url,header,success,failure,error=defaultError){
     }).catch(err=>error(err))
 }
 
+function get(url,success,failure=defaultFailure){
+    internalGet(url,accessHeader(),success,failure)
+}
+
+function post(url,data,success,failure=defaultFailure){
+    internalGet(url,data,accessHeader(),success,failure)
+}
+
 function login(username,password,remember,success,failure=defaultFailure){
     internalPost('/api/auth/login',{
         username:username,
@@ -79,4 +96,16 @@ function login(username,password,remember,success,failure=defaultFailure){
     },failure)
 }
 
-export {login}
+function logout(success,failure){
+    get("/api/auth/logout",()=>{
+        deleteAccessToken()
+        ElMessage.success("退出登陆成功")
+        success()
+    },failure)
+}
+
+function unauthorized(){
+    return !takeAccessToken()
+}
+
+export {login,logout,get,post,unauthorized}
