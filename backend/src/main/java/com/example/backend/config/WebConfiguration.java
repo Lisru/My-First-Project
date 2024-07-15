@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -10,5 +11,10 @@ public class WebConfiguration {
     @Bean
     BCryptPasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    Jackson2JsonMessageConverter jackson2JsonMessageConverter(){
+        return new Jackson2JsonMessageConverter();
     }
 }

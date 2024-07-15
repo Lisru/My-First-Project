@@ -1,4 +1,14 @@
 spring:
+  mail:
+    host: smtp.sina.com
+    username: lishiru0611@sina.com
+    password: 5969a9df39eeb07a
+  rabbitmq:
+    addresses: 139.9.142.46
+    username: admin
+    password: admin
+    virtual-host: /test
+    port: 5672
   security:
     jwt:
       key: abcdefghijk
