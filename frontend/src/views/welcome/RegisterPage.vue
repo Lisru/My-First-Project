@@ -1,9 +1,13 @@
 <script setup>
-import {reactive} from "vue";
+import {computed, reactive, ref} from "vue";
 import {Lock, User, Message} from "@element-plus/icons-vue";
 import router from "@/router/index.js";
 import {ElMessage} from "element-plus";
-import {get} from "@/net/index.js";
+import {get,post} from "@/net/index.js";
+
+const coldTime = ref(0)
+
+const formRef = ref()
 
 const form = reactive({
   username: '',
@@ -53,14 +57,37 @@ const rule = {
 }
 
 function askCode(){
-  if(/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/.test(form.email)){
+  if(isEmailValid){
+    coldTime.value =60
     get(`/api/auth/ask-code?email=${form.email}&type=register`,()=>{
       ElMessage.success('验证码已发送到邮箱')
+      const interval =setInterval(()=>{
+        coldTime.value--
+        if(coldTime.value==0) clearInterval(interval)
+      },1000)
+    },(message)=>{
+      ElMessage.warning("请输入正确的邮箱")
     })
   }else {
     ElMessage.warning('请输入正确的电子邮件')
   }
+}
 
+const isEmailValid = computed(()=> /^[\w.-]+@[\w.-]+\.\w+$/.test(form.email))
+
+function register(){
+  formRef.value.validate((valid)=>{
+    if(valid){
+      post(`/api/auth/register`,
+          {...form},
+          ()=>{
+        ElMessage.success('注册成功')
+        router.push('/')
+      })
+    }else {
+      ElMessage.warning('请完整填写表单内容')
+    }
+  })
 }
 </script>
 
@@ -71,7 +98,7 @@ function askCode(){
     <div style="font-size: 14px;color: grey">欢饮注册我们的学习平台</div>
   </div>
   <div style="margin-top: 50px">
-    <el-form :model="form" :rules="rule">
+    <el-form :model="form" :rules="rule" ref="formRef">
       <el-form-item prop="username">
         <el-input v-model="form.username" maxlength="10" type="text" placeholder="用户名">
           <template #prefix>
@@ -106,14 +133,16 @@ function askCode(){
             <el-input v-model="form.code" maxlength="6" type="text" placeholder="请输入验证码"/>
           </el-col>
           <el-col :span="5">
-            <el-button @click="askCode" type="success">获取验证码</el-button>
+            <el-button @click="askCode" :disabled=" !isEmailValid ||coldTime" type="success">
+              {{ coldTime > 0 ? `请稍等${coldTime}秒`:'获取验证码' }}
+            </el-button>
           </el-col>
         </el-row>
       </el-form-item>
     </el-form>
   </div>
   <div style="margin-top: 20px">
-    <el-button style="width: 270px" type="warning">立即注册</el-button>
+    <el-button @click="register" style="width: 270px" type="warning">立即注册</el-button>
   </div>
   <div style="margin-top: 20px">
     <span style="font-size: 14px;color: grey">已有账号?</span>

@@ -80,7 +80,7 @@ function get(url,success,failure=defaultFailure){
 }
 
 function post(url,data,success,failure=defaultFailure){
-    internalGet(url,data,accessHeader(),success,failure)
+    internalPost(url,data,accessHeader(),success,failure)
 }
 
 function login(username,password,remember,success,failure=defaultFailure){
