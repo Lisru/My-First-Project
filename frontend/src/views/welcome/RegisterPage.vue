@@ -114,7 +114,7 @@ function register(){
         </el-input>
       </el-form-item>
       <el-form-item prop="password_repeat">
-        <el-input v-model="form.password_repeat" maxlength="10" type="password" placeholder="重复密码密码">
+        <el-input v-model="form.password_repeat" maxlength="10" type="password" placeholder="重复密码">
           <template #prefix>
             <el-icon><Lock /></el-icon>
           </template>
