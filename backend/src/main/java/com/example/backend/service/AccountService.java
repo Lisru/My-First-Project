@@ -5,10 +5,13 @@ import com.example.backend.entity.dto.Account;
 import com.example.backend.entity.vo.request.ConfirmResetVO;
 import com.example.backend.entity.vo.request.EmailRegisterVO;
 import com.example.backend.entity.vo.request.EmailResetVO;
+import com.example.backend.entity.vo.request.ModifyEmailVO;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
 public interface AccountService extends IService<Account>, UserDetailsService {
     Account findAccountByNameOrEmail(String text);
+
+    Account findAccountById(int id);
 
     String registerEmailVerifyCode(String type,String email,String ip);
 
@@ -17,4 +20,6 @@ public interface AccountService extends IService<Account>, UserDetailsService {
     String resetConfirm(ConfirmResetVO vo);
 
     String resetEmailAccountPassword(EmailResetVO vo);
+
+    String modifyEmail(int id, ModifyEmailVO vo);
 }

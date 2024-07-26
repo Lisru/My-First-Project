@@ -6,6 +6,7 @@ import com.example.backend.entity.dto.Account;
 import com.example.backend.entity.vo.request.ConfirmResetVO;
 import com.example.backend.entity.vo.request.EmailRegisterVO;
 import com.example.backend.entity.vo.request.EmailResetVO;
+import com.example.backend.entity.vo.request.ModifyEmailVO;
 import com.example.backend.mapper.AccountMapper;
 import com.example.backend.service.AccountService;
 import com.example.backend.utils.Const;
@@ -109,7 +110,6 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
         }else {
             return "内部错误，请联系管理员";
         }
-
     }
 
     private boolean existAccountByEmail(String email){
@@ -149,5 +149,37 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
             stringRedisTemplate.delete(Const.VERIFY_EMAIL_DATA + email);
         }
         return null;
+    }
+
+    @Override
+    public Account findAccountById(int id) {
+        return this.query().eq("id",id).one();
+    }
+
+    /**
+     * 修改邮箱
+     * @param id
+     * @param vo
+     * @return
+     */
+    @Override
+    public String modifyEmail(int id, ModifyEmailVO vo) {
+        String email = vo.getEmail();
+        String code = stringRedisTemplate.opsForValue().get(Const.VERIFY_EMAIL_DATA+email);
+        if(code == null) return "请先获取验证码";
+        if(!code.equals((vo.getCode()))) return "验证码错误，请重新输入";
+        this.deleteEmailVerifyCode(email);
+        Account account = this.findAccountByNameOrEmail(email);
+        if(account != null && account.getId() != id)
+            return "该电子邮件已经被其他账号绑定，无法完成此操作";
+        this.update()
+                .set("email",email)
+                .eq("id",id)
+                .update();
+        return null;
+    }
+
+    private void deleteEmailVerifyCode(String email){
+        this.stringRedisTemplate.delete(Const.VERIFY_EMAIL_DATA + email);
     }
 }

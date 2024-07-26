@@ -39,7 +39,7 @@ function userLogin(){
   <div style="margin-top: 50px">
     <el-form :model="form" :rules="rule" ref="formRef">
       <el-form-item prop="username">
-        <el-input v-model="form.username" maxlength="10" type="text" placeholder="请输入用户名">
+        <el-input v-model="form.username" maxlength="20" type="text" placeholder="请输入用户名">
           <template #prefix>
             <el-icon><User /></el-icon>
           </template>
