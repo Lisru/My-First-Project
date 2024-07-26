@@ -30,6 +30,6 @@ public class CorsFilters extends HttpFilter {
         //允许访问的站点，这里是原始请求的站点
         response.addHeader("Access-Control-Allow-Origin",request.getHeader("Origin"));
         response.addHeader("Access-Control-Allow-Methods","GET,POST,PUT,DELETE,POTIONS");
-        response.addHeader("Access-Control-Allow-Methods","Authorization,Content-Type");
+        response.addHeader("Access-Control-Allow-Headers","Authorization,Content-Type");
     }
 }
