@@ -3,10 +3,7 @@ package com.example.backend.service.impl;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.example.backend.entity.dto.Account;
-import com.example.backend.entity.vo.request.ConfirmResetVO;
-import com.example.backend.entity.vo.request.EmailRegisterVO;
-import com.example.backend.entity.vo.request.EmailResetVO;
-import com.example.backend.entity.vo.request.ModifyEmailVO;
+import com.example.backend.entity.vo.request.*;
 import com.example.backend.mapper.AccountMapper;
 import com.example.backend.service.AccountService;
 import com.example.backend.utils.Const;
@@ -17,6 +14,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -181,5 +179,14 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
 
     private void deleteEmailVerifyCode(String email){
         this.stringRedisTemplate.delete(Const.VERIFY_EMAIL_DATA + email);
+    }
+
+    @Override
+    public String changePassword(int id, ChangePasswordVO vo) {
+        String password = this.query().eq("id",id).one().getPassword();
+        if(!encoder.matches(password,vo.getPassword()))
+            return "原密码错误，请重新输入";
+        boolean success = this.update().eq("id",id).set("password",encoder.encode(vo.getPassword())).update();
+        return success? null:"未知错误，请联系管理员";
     }
 }

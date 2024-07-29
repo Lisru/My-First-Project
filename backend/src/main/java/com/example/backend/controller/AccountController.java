@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.entity.RestBean;
 import com.example.backend.entity.dto.Account;
 import com.example.backend.entity.dto.AccountDetails;
+import com.example.backend.entity.vo.request.ChangePasswordVO;
 import com.example.backend.entity.vo.request.DetailsSaveVO;
 import com.example.backend.entity.vo.request.ModifyEmailVO;
 import com.example.backend.entity.vo.response.AccountDetailsVO;
@@ -49,6 +50,13 @@ public class AccountController {
     public  RestBean<Void> modifyEmail(@RequestAttribute("id") int id,
                                        @RequestBody @Valid ModifyEmailVO vo){
         String result = service.modifyEmail(id, vo);
+        return result == null?RestBean.success():RestBean.failure(400,result);
+    }
+
+    @PostMapping("/change-password")
+    public RestBean<Void> changePassword(@RequestAttribute("id") int id,
+                                         @RequestBody @Valid ChangePasswordVO vo){
+        String result = service.changePassword(id, vo);
         return result == null?RestBean.success():RestBean.failure(400,result);
     }
 }
