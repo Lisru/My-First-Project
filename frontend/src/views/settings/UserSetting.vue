@@ -5,7 +5,8 @@ import {Message, Refresh, Select, User} from "@element-plus/icons-vue";
 import {userStore} from "@/store/index.js";
 import {computed, reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
-import {post,get} from "@/net/index.js"
+import {post, get, accessHeader} from "@/net/index.js"
+import axios from "axios";
 
 
 const store = userStore()
@@ -92,29 +93,53 @@ const onValidate = (prop,isValid)=>{
 }
 
 function sendEmailCode(){
-  coldTime.value = 60
-  get(`/api/auth/ask-code?email=${emailForm.email}&type=modify`,()=>{
-    ElMessage.success(`验证码已成功发送致邮箱：${emailForm.email}，请注意查收`)
-    const handle = setInterval(()=>{
-      coldTime.value--
-      if(coldTime.value === 0){
-        clearInterval(handle)
-      }
-    },1000)
-  },(message)=>{
-    ElMessage.warning(message)
-    coldTime.value = 0
+  emailFormRef.value.validate(isValid=>{
+    if(isValid){
+      coldTime.value = 60
+      get(`/api/auth/ask-code?email=${emailForm.email}&type=modify`,()=>{
+        ElMessage.success(`验证码已成功发送致邮箱：${emailForm.email}，请注意查收`)
+        const handle = setInterval(()=>{
+          coldTime.value--
+          if(coldTime.value === 0){
+            clearInterval(handle)
+          }
+        },1000)
+      },(message)=>{
+        ElMessage.warning(message)
+        coldTime.value = 0
+      })
+    }
   })
 }
 
 function modifyEmail(){
   emailFormRef.value.validate((isValid)=>{
-    post('/api/user/modify-email',emailForm,()=>{
-      ElMessage.success('邮件修改成功')
-      store.user.email = emailForm.email
-      emailForm.code = ''
-    })
+    if(isValid){
+      post('/api/user/modify-email',emailForm,()=>{
+        ElMessage.success('邮件修改成功')
+        store.user.email = emailForm.email
+        emailForm.code = ''
+      })
+    }
   })
+}
+
+// 验证图片
+function beforeAvatarUpload(rawFile){
+  if(rawFile.type !== 'image/jpeg' && rawFile.type !== 'image/png'){
+    ElMessage.error("头像只能事JPG/PNG格式")
+    return false
+  }else if(rawFile.size /1024 >100){
+    ElMessage.error("图片不能大于100MB")
+    return false
+  }else {
+    return true
+  }
+}
+
+function uploadSuccess(response){
+  ElMessage.success("头像上传成功")
+  store.user.avatar = response.data
 }
 </script>
 
@@ -179,7 +204,17 @@ function modifyEmail(){
     <div style="position: sticky;top: 20px">
       <card>
         <div style="text-align: center;padding: 5px 15px 0 15px">
-          <el-avatar :size="70" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"/>
+          <el-avatar :size="70" :src="store.avatarUrl"/>
+          <div style="margin: 5px 0">
+            <el-upload
+                :action="axios.defaults.baseURL+'/api/image/avatar'"
+                :show-file-list="false"
+                :before-upload="beforeAvatarUpload"
+                :on-success="uploadSuccess"
+                :headers="accessHeader()">
+              <el-button >修改头像</el-button>
+            </el-upload>
+          </div>
           <div style="font-weight: bold">你好，{{store.user.username}}</div>
         </div>
         <el-divider/>

@@ -50,6 +50,7 @@ function storeAccessToken(token,remember,expire){
     }
 }
 
+//在header上带上token
 function accessHeader(){
     const token = takeAccessToken();
     return token ? {"Authorization": `Bearer ${takeAccessToken()}`}:{}
@@ -108,4 +109,4 @@ function unauthorized(){
     return !takeAccessToken()
 }
 
-export {login,logout,get,post,unauthorized}
+export {login,logout,get,post,unauthorized,accessHeader}

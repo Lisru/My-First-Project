@@ -18,3 +18,7 @@ spring:
     url: jdbc:mysql://localhost:3306/reborn_project
     username: root
     password: 123
+  minio:
+    endpoint: 'http://139.9.142.46:9000'
+    username: 'minio'
+    password: 'password'
