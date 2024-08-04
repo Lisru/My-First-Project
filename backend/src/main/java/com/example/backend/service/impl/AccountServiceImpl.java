@@ -184,9 +184,9 @@ public class AccountServiceImpl extends ServiceImpl<AccountMapper, Account> impl
     @Override
     public String changePassword(int id, ChangePasswordVO vo) {
         String password = this.query().eq("id",id).one().getPassword();
-        if(!encoder.matches(password,vo.getPassword()))
+        if(!encoder.matches(vo.getPassword(),password))
             return "原密码错误，请重新输入";
-        boolean success = this.update().eq("id",id).set("password",encoder.encode(vo.getPassword())).update();
+        boolean success = this.update().eq("id",id).set("password",encoder.encode(vo.getNew_password())).update();
         return success? null:"未知错误，请联系管理员";
     }
 }
