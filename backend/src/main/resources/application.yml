@@ -22,3 +22,5 @@ spring:
     endpoint: 'http://139.9.142.46:9000'
     username: 'minio'
     password: 'password'
+  weather:
+    key: 870932b6e1834b39a2c78b2ca6d0b093

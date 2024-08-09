@@ -3,11 +3,41 @@
 import LightCard from "@/components/LightCard.vue";
 import {Calendar, CollectionTag, EditPen, Link} from "@element-plus/icons-vue";
 import Weather from "@/components/Weather.vue";
-import {computed} from "vue";
+import {computed, reactive} from "vue";
+import {get} from "@/net/index.js"
+import {ElMessage} from "element-plus";
+import TopicEdit from "@/components/TopicEdit.vue";
 
 const today = computed(()=>{
   const date = new Date()
-  return `${date.getFullYear()} 年 ${date.getMonth()} 月 ${date.getDate()} 日`
+  return `${date.getFullYear()} 年 ${date.getMonth()+1} 月 ${date.getDate()} 日`
+})
+
+const weather = reactive({
+  location: {},
+  now: {},
+  hourly: [],
+  success: false
+})
+
+navigator.geolocation.getCurrentPosition(position =>{
+  const longitude = position.coords.longitude
+  const latitude = position.coords.latitude
+  get(`/api/forum/weather?longitude=${longitude}&latitude=${latitude}`,data=>{
+    Object.assign(weather,data)    //复制数据
+    weather.success = true
+  })
+},error => {
+  console.info(error)
+  ElMessage.warning('位置信息获取超时')
+  get(`/api/forum/weather?longitude=28.23&latitude=112.93`,data=>{
+    Object.assign(weather,data)    //复制数据
+    weather.success = true
+    console.log("data",data)
+  })
+},{
+  timeout: 3000,
+  enableHighAccuracy: true
 })
 </script>
 
@@ -46,7 +76,7 @@ const today = computed(()=>{
           天气信息
         </div>
         <el-divider/>
-        <Weather/>
+        <Weather :data="weather"/>
       </LightCard>
       <LightCard>
         <div class="info-text">
@@ -70,6 +100,7 @@ const today = computed(()=>{
       </div>
     </div>
   </div>
+  <topic-edit :show="true"/>
 </div>
 </template>
 

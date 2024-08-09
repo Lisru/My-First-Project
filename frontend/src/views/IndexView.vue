@@ -85,7 +85,8 @@ function userLogout(){
             <el-menu
                 router
                 default-active="1-1"
-                style="min-height: calc(100vh - 55px);">
+                style="min-height: calc(100vh - 55px);"
+                default-openeds="['1','2','3']">
               <el-sub-menu index="1">
                 <template #title>
                   <el-icon><House /></el-icon>
